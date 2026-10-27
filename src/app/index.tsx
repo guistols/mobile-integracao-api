@@ -1,98 +1,67 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useReceitasFetch } from "@/hook/useReceitasFetch";
+import { Receita } from "@/types/receita";
+import { useEffect, useState } from "react";
+import { Button, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function Index() {
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+  const [receitas,setReceitas] = useState<Receita[]>([])
+  const [nomeReceita,setNomeReceita] = useState("")
+  const [tempoPreparo, setTempoPreparo]= useState("")
+  const [ingredientes, setIngredientes]= useState("")
+
+  const {listar,criarReceita} = useReceitasFetch();
+
+  const salvarReceita = async () =>{
+    const receita = {
+      nome: nomeReceita,
+      tempoPreparo: Number(tempoPreparo),
+      ingredientes: ingredientes
+    }
+    
+    criarReceita(receita)
+    
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+
+  const carregarReceitas = async() => {
+    const resposta = await listar()
+    setReceitas(resposta)
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
+  useEffect(()=>{
+    carregarReceitas()
+  },[])
+
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <View>
+        <Text>Nome da receita:</Text>
+        <TextInput onChangeText={setNomeReceita}></TextInput>
+        <Text>Tempo de preparo:</Text>
+        <TextInput onChangeText={setTempoPreparo}></TextInput>
+        <Text>Ingredientes:</Text>
+        <TextInput onChangeText={setIngredientes}></TextInput>
+        <Button title={"Criar receita"} onPress={salvarReceita}></Button>
+      </View>
+      <FlatList
+        data={receitas}
+        renderItem={({item}) => (
+          <View>
+              <Text>{item.id}# - {item.nome} - Tempo de preparo: {item.tempoPreparo}</Text>
+          </View>
+        )}
+      >
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      </FlatList>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

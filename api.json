@@ -1,0 +1,17 @@
+{
+  "receitas": [
+    {
+      "id": "1",
+      "nome": "Panqueca",
+      "tempoPreparo": 40,
+      "Ingredientes": "Massa e carne"
+    },
+    {
+      "nome": "teste",
+      "tempoPreparo": 20,
+      "ingredientes": "sim",
+      "id": "GPsioQoO1X8"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
